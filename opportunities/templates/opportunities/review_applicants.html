@@ -14,6 +14,10 @@
             {% for response in responses %}
                 <th>{{response.requirement.element.title}}</th>
             {% endfor %}
+        {% else %}
+            {% for requirement in requirements %}
+                <th>{{requirement.element.title}}</th>
+            {% endfor %}
         {% endif %}
         {% if required_skills %}
             {% for required_skill in required_skills %}

@@ -1,0 +1,42 @@
+{% extends "opportunities/base.html" %}
+{% load static %}
+
+{% block main %}
+
+{% if member %}
+<h1>{{member.name}}</h1>
+<img src="{{ member.image.url }}" width="300"/>
+<hr>
+<h4>{{member.bio}}</h4>
+
+<hr>
+
+{% if skill_links %}
+<h4>Skills</h4>
+    {% for skill_link in skill_links %}
+        <h4>Skill: {{skill_link.skill.title}}</h4>
+        <h5>Level: {{skill_link.level}}</h5>
+    {% endfor %}
+{% else %}
+    <p>No Skills</p>
+{% endif %}
+
+<hr>
+
+{% if applications %}
+    <h3>Applications</h3>
+    {% for application in applications %}
+<h4>Opportunity: <a href="{% url 'view_opportunity' application.opportunity.slug %}">{{application.opportunity.title}}</a></h4>
+        <h5>Date: {{application.apply_date}}</h5>
+        <h5>Status: XXX</h5>
+        <h5><a href="/">See Application</a></h5>
+    {% endfor %}
+{% else %}
+    <p>No Applications</p>
+{% endif %}
+
+{% else %}
+<p>No Member here</p>
+{% endif %}
+
+{% endblock main%}

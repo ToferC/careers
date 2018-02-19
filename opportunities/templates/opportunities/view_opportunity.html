@@ -1,0 +1,48 @@
+{% extends "opportunities/base.html" %}
+
+{% block main %}
+
+{% if opportunity %}
+
+<h1>{{opportunity.title}}</h1>
+<img src="{{ opportunity.image.url }}" width="300"/>
+<hr>
+<h4>{{opportunity.type}}</h4>
+<h4>{{opportunity.description}}</h4>
+<hr>
+
+{% if requirements %}
+    {% for requirement in requirements %}
+        <h4>Requirement: {{requirement.element.title}}</h4>
+        <h5>Type: {{requirement.element.req_type}}</h5>
+        <h5>Description: {{requirement.element.description}}</h5>
+        <h5>{{requirement.response.evidence}}</h5>
+<br>
+    {% endfor %}
+{% else %}
+    <p>No requirements</p>
+{% endif %}
+
+<hr>
+{% if opportunity.creator == request.user.member %}
+{% if applications %}
+    <h3>Applications</h3>
+    {% for application in applications %}
+<h4>Member: <a href="{% url 'view_member' application.applicant.slug %}">{{application.applicant.name}}</a></h4>
+        <h5>Date: {{application.apply_date}}</h5>
+        <h5>Status: XXX</h5>
+        <h5><a href="{% url 'view_application' application.slug %}">See Application</a></h5>
+    {% endfor %}
+{% else %}
+    <p>No Applications</p>
+{% endif %}
+
+{% else %}
+<a type="button" class="btn btn-primary" href="/" >Apply</a>
+{% endif %}
+
+{% else %}
+<p>No opportunity here</p>
+{% endif %}
+
+{% endblock main%}

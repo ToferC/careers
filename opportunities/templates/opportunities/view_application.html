@@ -1,0 +1,39 @@
+{% extends "opportunities/base.html" %}
+
+{% block main %}
+
+{% if application %}
+
+<h1>{{application}}</h1>
+<h4>{{application.opportunity.title}}</h4>
+<h4>Status: {{status.status}}</h4>
+<hr>
+
+{% if requirements %}
+<h4>Requirements</h4>
+    {% for requirement in requirements %}
+        <h4>Requirement: {{requirement.element.title}}</h4>
+        <h5>Type: {{requirement.element.req_type}}</h5>
+        <h5>Description: {{requirement.element.description}}</h5>
+        <h5>{{requirement.response.evidence}}</h5>
+        <a href="/">Provide Response</a>
+        <br><br>
+    {% endfor %}
+{% else %}
+    <p>No requirements</p>
+{% endif %}
+
+<br>
+
+{% if application.applicant %}
+    <h3>Applicants</h3>
+<h4>{{application.applicant.name}} <a type="button" class="btn btn-primary" href="{% url 'view_member' application.applicant.slug %}">See Member Profile</a></h4>
+{% else %}
+    <p>No Member</p>
+{% endif %}
+
+{% else %}
+<p>No application here</p>
+{% endif %}
+
+{% endblock main%}

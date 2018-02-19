@@ -1,0 +1,22 @@
+{% extends "opportunities/base.html" %}
+
+{% block main %}
+<h1>Opportunities</h1>
+{% if opportunities %}
+<ul>
+    {% for opportunity in opportunities %}
+
+    <div class="card" style="width: 18rem;">
+  <img class="card-img-top" src="{{ opportunity.image.url }}" width="300" alt="Card image cap"/>
+  <div class="card-body">
+    <h5 class="card-title">{{opportunity.title}}</h5>
+    <p class="card-text">{{opportunity.description}}</p>
+    <a href="{% url 'view_opportunity' opportunity_slug=opportunity.slug %}" class="btn btn-primary">Visit Opportunity</a>
+  </div>
+</div>
+    {% endfor %}</ul>
+
+{% else %}
+    <p>No opportunities are available</p>
+{% endif %}
+{% endblock main %}

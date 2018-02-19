@@ -1,0 +1,46 @@
+{% extends "opportunities/base.html" %}
+
+{% block main %}
+
+{% if opportunity %}
+
+<h1>{{opportunity.title}}</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+        <th scope=col">Applicant</th>
+        {% if responses %}
+            {% for response in responses %}
+                <th>{{response.requirement.element.title}}</th>
+            {% endfor %}
+        {% endif %}
+        {% if required_skills %}
+            {% for required_skill in required_skills %}
+                <th>{{required_skill.skill.title}}</th>
+            {% endfor %}
+        {% endif %}
+    </tr>
+  </thead>
+  <tbody>
+        {% for application in applications %}
+        <tr>
+          <th scope="row">{{application.applicant.name}}</th>
+            {% for response in responses %}
+                <td>{{response.assessment}}</td>
+            {% endfor %}
+            {% for required_skill in required_skills %}
+                <td>{{required_skill.required_level}}</td>
+            {% endfor %}
+            <td><a type="button" class="btn btn-primary" href="{% url 'view_member' application.applicant.slug %}">View Member</a>
+</td>
+        </tr>
+        {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<p>No Opportunity Here</p>
+{% endif %}
+
+{% endblock main%}

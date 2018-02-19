@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import Opportunity, Element, Response, Application, Member
-from .models import Requirement, ApplicationStatus, Assessment, Skill
-from .models import MemberSkillLink, OpenRecommendation, SkillRecommendation
+from .models import Requirement, ApplicationStatus, GenericSkill, RequiredSkill
+from .models import LinkedSkill, OpenRecommendation, SkillRecommendation
 from .models import Tag, File
 
 
@@ -34,11 +34,49 @@ def view_opportunity(request, opportunity_slug):
         opportunity=opportunity
     )
 
+    required_skills = RequiredSkill.objects.filter(
+        opportunity=opportunity
+    )
+
     context['opportunity'] = opportunity
     context['requirements'] = requirements
     context['applications'] = applications
+    context['required_skills'] = required_skills
 
     return render(request, 'opportunities/view_opportunity.html', context)
+
+
+def review_applicants(request, opportunity_slug):
+
+    context = {}
+
+    opportunity = Opportunity.objects.get(
+        slug=opportunity_slug
+    )
+
+    requirements = Requirement.objects.filter(
+        opportunity=opportunity)
+
+    applications = Application.objects.filter(
+        opportunity=opportunity
+    )
+
+    required_skills = RequiredSkill.objects.filter(
+        opportunity=opportunity
+    )
+
+    responses = Response.objects.filter(
+        application__opportunity=opportunity
+    )
+
+    context['opportunity'] = opportunity
+    context['requirements'] = requirements
+    context['applications'] = applications
+    context['required_skills'] = required_skills
+    context['responses'] = responses
+
+    return render(request, 'opportunities/review_applicants.html', context)
+
 
 
 def view_member(request, member_slug):
@@ -49,7 +87,7 @@ def view_member(request, member_slug):
         slug=member_slug
     )
 
-    skill_links = MemberSkillLink.objects.filter(
+    skill_links = LinkedSkill.objects.filter(
         member=member)
 
     applications = Application.objects.filter(
@@ -78,8 +116,13 @@ def view_application(request, application_slug):
         opportunity=application.opportunity
     )
 
+    responses = Response.objects.filter(
+        application=application
+    )
+
     context['application'] = application
     context['status'] = status
     context['requirements'] = requirements
+    context['responses'] = responses
 
     return render(request, 'opportunities/view_application.html', context)

@@ -16,11 +16,24 @@
         <h4>Requirement: {{requirement.element.title}}</h4>
         <h5>Type: {{requirement.element.req_type}}</h5>
         <h5>Description: {{requirement.element.description}}</h5>
-        <h5>{{requirement.response.evidence}}</h5>
 <br>
     {% endfor %}
 {% else %}
     <p>No requirements</p>
+{% endif %}
+
+<hr>
+
+{% if required_skills %}
+<h4>Required Skills</h4>
+    {% for required_skill in required_skills %}
+        <h5>Skill: {{required_skill.skill.title}}</h5>
+        <h5>Level: {{required_skill.required_level}}</h5>
+        <h5>Description: {{required_skill.description}}</h5>
+<br>
+    {% endfor %}
+{% else %}
+    <p>No required skills</p>
 {% endif %}
 
 <hr>
@@ -44,5 +57,7 @@
 {% else %}
 <p>No opportunity here</p>
 {% endif %}
+
+<a type="button" class="btn btn-primary" href="{% url 'review_applicants' opportunity.slug %}">Review Applicants</a>
 
 {% endblock main%}

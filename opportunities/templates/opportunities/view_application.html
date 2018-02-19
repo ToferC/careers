@@ -9,15 +9,23 @@
 <h4>Status: {{status.status}}</h4>
 <hr>
 
-{% if requirements %}
+{% if responses %}
 <h4>Requirements</h4>
-    {% for requirement in requirements %}
-        <h4>Requirement: {{requirement.element.title}}</h4>
-        <h5>Type: {{requirement.element.req_type}}</h5>
-        <h5>Description: {{requirement.element.description}}</h5>
-        <h5>{{requirement.response.evidence}}</h5>
-        <a href="/">Provide Response</a>
-        <br><br>
+    {% for response in responses %}
+        <h4>Requirement: {{response.requirement.element.title}}</h4>
+        <h5>Type: {{response.requirement.element.req_type}}</h5>
+        <h5>Description: {{response.requirement.element.description}}</h5>
+        <hr>
+        <h5>Evidence: {{response.evidence}}</h5>
+        <h5>Assessment: {{response.assessment}}</h5>
+        <h5>Rationale: {{response.rationale}}</h5>
+        {% if application.applicant %}
+        <a type="button" class="btn btn-primary" href="#">Provide Response</a>
+        {% endif %}
+        {% if application.opportunity.creator %}
+        <a type="button" class="btn btn-primary" href="#">Assess</a>
+        {% endif %}
+        <hr>
     {% endfor %}
 {% else %}
     <p>No requirements</p>

@@ -28,10 +28,10 @@ SKILL_LEVELS = (
 
 # Requirement Types
 
+QUESTION = "QE"
 DEMOGRAPHIC = "DE"
 EDUCATION = "ED"
 CERTIFICATION = "CE"
-SKILL = "SK"
 TRAINING = "TR"
 EXPERIENCE = "EX"
 BEHAVIOR = "BE"
@@ -41,7 +41,6 @@ REQUIREMENT_CHOICES = (
     ("DEMOGRAPHIC", "Demographic"),
     ("EDUCATION", "Education"),
     ("CERTIFICATION", "Certification"),
-    ("SKILL", "Skill"),
     ("TRAINING", "Training"),
     ("EXPERIENCE", "Experience"),
     ("BEHAVIOR", "Behavior")
@@ -186,7 +185,7 @@ class Element(models.Model):
     creator = models.ForeignKey(Member, on_delete=models.CASCADE)
     req_type = models.CharField(max_length=32,
                                 choices=REQUIREMENT_CHOICES,
-                                default=SKILL
+                                default=EXPERIENCE
                                 )
     description = models.TextField(max_length=250, blank=True)
     weight = models.FloatField(default=1)
@@ -216,16 +215,33 @@ class Requirement(models.Model):
 class Response(models.Model):
     """
     Model representing an applicant's response to opportunity
-    requirements.
+    requirements and their assessment.
     """
 
-    applicant = models.ForeignKey(Member, on_delete=models.CASCADE)
+    applicant = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        related_name='applying_member'
+    )
+    application = models.ForeignKey('Application', on_delete=models.CASCADE)
     evidence = models.TextField(max_length=500)
     file = models.ForeignKey("File", blank=True, null=True,
                              on_delete=models.CASCADE)
     requirement = models.ForeignKey(Requirement, on_delete=models.CASCADE)
     submitted_date = models.DateTimeField(auto_now=True)
     edited_date = models.DateTimeField(auto_now=True)
+
+    # Assessing fields
+    assessor = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE,
+        related_name='assessing_member'
+    )
+    assessment = models.CharField(max_length=32,
+                                  choices=ASSESSMENT_CHOICES,
+                                  default=MEETS)
+    rationale = models.TextField(max_length=500)
+    assessed_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.applicant.name}-{self.requirement}"
@@ -276,25 +292,7 @@ class ApplicationStatus(models.Model):
         return f"{self.application}-{self.status}"
 
 
-class Assessment(models.Model):
-    """
-    Model for administrators to assess a candidate against a requirement for an opportunity
-    """
-
-    assessor = models.ForeignKey(Member, on_delete=models.CASCADE)
-    requirement = models.ForeignKey(Requirement, on_delete=models.CASCADE)
-    assessment = models.CharField(max_length=32,
-                                  choices=ASSESSMENT_CHOICES,
-                                  default=MEETS)
-    rationale = models.TextField(max_length=500)
-    date = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f'''{self.assessor.name}-
-        {self.requirement.element.title}-{self.assessment}'''
-
-
-class Skill(models.Model):
+class GenericSkill(models.Model):
 
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=256)
@@ -309,13 +307,13 @@ class Skill(models.Model):
         return f"{self.title}"
 
 
-class MemberSkillLink(models.Model):
+class LinkedSkill(models.Model):
     """
     Model that initially connects a generic skill
     with a Member and sets level.
     """
 
-    skill = models.ForeignKey(Skill,
+    skill = models.ForeignKey(GenericSkill,
                               on_delete=models.CASCADE,
                               related_name="linked_skill")
 
@@ -330,6 +328,34 @@ class MemberSkillLink(models.Model):
 
     def __str__(self):
         return f"{self.member.name}-{self.skill.title}-{self.level}"
+
+
+class RequiredSkill(models.Model):
+    """
+    Model that initially connects a generic skill
+    with an Opportunity and sets the required level.
+    """
+
+    skill = models.ForeignKey(GenericSkill,
+                              on_delete=models.CASCADE,
+                              related_name="required_skill")
+
+    required_level = models.CharField(max_length=15,
+                             choices=SKILL_LEVELS,
+                             default=NOVICE)
+    opportunity = models.ForeignKey(Opportunity,
+                               on_delete=models.CASCADE,
+                               related_name="linked_opportunity"
+                               )
+    description = models.TextField(
+        max_length=250,
+        blank=True,
+        default="Enter description here"
+    )
+    created_date = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.opportunity.title}-{self.skill.title}-{self.required_level}"
 
 
 class OpenRecommendation(models.Model):
@@ -357,7 +383,7 @@ class OpenRecommendation(models.Model):
 
 class SkillRecommendation(models.Model):
     creator = models.ForeignKey(Member, on_delete=models.CASCADE)
-    skill = models.ForeignKey(MemberSkillLink, on_delete=models.CASCADE)
+    skill = models.ForeignKey(LinkedSkill, on_delete=models.CASCADE)
     level = models.CharField(max_length=15, choices=SKILL_LEVELS,
                              default=NOVICE)
     text = models.TextField(max_length=250, blank=True)

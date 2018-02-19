@@ -29,7 +29,7 @@
 <h4>Opportunity: <a href="{% url 'view_opportunity' application.opportunity.slug %}">{{application.opportunity.title}}</a></h4>
         <h5>Date: {{application.apply_date}}</h5>
         <h5>Status: XXX</h5>
-        <h5><a href="/">See Application</a></h5>
+        <h5><a href="{% url 'view_application' application.slug %}">See Application</a></h5>
     {% endfor %}
 {% else %}
     <p>No Applications</p>

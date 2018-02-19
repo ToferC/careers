@@ -48,11 +48,13 @@ REQUIREMENT_CHOICES = (
 
 # Assessments
 
+UNASSESSED = "UN"
 MEETS = "ME"
 FAILS = "FL"
 EXCEEDS = "EX"
 
 ASSESSMENT_CHOICES = (
+    ("UNASSESSED", "Not Assessed"),
     ("MEETS", "Meets requirement"),
     ("FAILS", "Does not meet requirement"),
     ("EXCEEDS", "Exceeds requirement")
@@ -224,7 +226,7 @@ class Response(models.Model):
         related_name='applying_member'
     )
     application = models.ForeignKey('Application', on_delete=models.CASCADE)
-    evidence = models.TextField(max_length=500)
+    evidence = models.TextField(max_length=500, blank=True)
     file = models.ForeignKey("File", blank=True, null=True,
                              on_delete=models.CASCADE)
     requirement = models.ForeignKey(Requirement, on_delete=models.CASCADE)
@@ -239,8 +241,8 @@ class Response(models.Model):
     )
     assessment = models.CharField(max_length=32,
                                   choices=ASSESSMENT_CHOICES,
-                                  default=MEETS)
-    rationale = models.TextField(max_length=500)
+                                  default=UNASSESSED)
+    rationale = models.TextField(max_length=500, blank=True)
     assessed_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -270,6 +272,21 @@ class Application(models.Model):
         self.slug = slugify(f"{self.applicant.name}-{self.opportunity.title}")
         super(Application, self).save(*args, **kwargs)
 
+        requirements = Requirement.objects.filter(opportunity=self.opportunity)
+
+        for requirement in requirements:
+            Response.objects.create(
+                applicant=self.applicant,
+                application=self,
+                requirement=requirement,
+                assessor=self.opportunity.creator,
+            )
+
+        ApplicationStatus.objects.create(
+            application=self
+        )
+
+
     def __str__(self):
         return f"{self.applicant.name}-{self.opportunity.title}"
 
@@ -281,9 +298,9 @@ class ApplicationStatus(models.Model):
     status = models.CharField(
         max_length=32,
         choices=APPLICATION_STATUS_TYPES,
-        default=APPLIED)
+        default="Applied")
     status_date = models.DateTimeField(auto_now=True)
-    end_date = models.DateTimeField()
+    end_date = models.DateTimeField(blank=True, null=True)
 
     def set_status_to_screened_out(self):
         self.status = "Screened Out"

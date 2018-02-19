@@ -6,15 +6,13 @@
 
 <h1>{{opportunity.title}}</h1>
 
+{% if applications %}
+
 <table class="table">
   <thead>
     <tr>
         <th scope=col">Applicant</th>
-        {% if responses %}
-            {% for response in responses %}
-                <th>{{response.requirement.element.title}}</th>
-            {% endfor %}
-        {% else %}
+        {% if requirements %}
             {% for requirement in requirements %}
                 <th>{{requirement.element.title}}</th>
             {% endfor %}
@@ -42,6 +40,10 @@
         {% endfor %}
   </tbody>
 </table>
+
+{% else %}
+    <h4>No Applicants to this Opportunity.</h4>
+{% endif %}
 
 {% else %}
 <p>No Opportunity Here</p>
